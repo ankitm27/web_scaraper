@@ -1,0 +1,130 @@
+from django.shortcuts import render
+from django.contrib.auth.models import User
+from registration.models import RegistrationProfile
+from .forms import ContactForm,ProfileForm,DomainForm
+from .models import Profile,Domain
+import re
+
+def home(request):
+    title = "Home"
+    if request.user.is_authenticated():
+        list=Domain.objects.filter(username=request.user)
+        values = ' '.join(str(v) for v in list)        
+        new_list=re.split(',',values)	
+        new=[]
+        for i in new_list:
+            a=re.findall('[a-zA-Z]',i)
+            a="".join(a)
+            new.append(a[1:])
+        if request.method == "POST":
+            form = DomainForm(request.POST,instance=request.user.domain)
+            if form.is_valid():
+                form.save()
+        else:
+            user=request.user
+            domain=user.domain
+            form = DomainForm(instance = domain)
+        context = {
+            'form': form,
+            'title': title,
+            'list':new,
+        }    
+    else:
+        context = {
+            'title':title,
+	}
+    return render(request,'home.html',context)
+
+def contact(request):
+    title = "Contact Us"
+    form = ContactForm(None)
+    if request.method == 'POST':
+        form = ContactForm(request.POST)
+        if form.is_valid():
+            pass
+            # for key, value in form.cleaned_data.iteritems():
+            #   print key, value
+    context = {
+        'form': form,
+        'title': title,
+    }   
+    return render(request,'contact.html',context)
+
+def about(request):
+    title = "About"
+    return render(request,'about.html',{'title': title})
+
+def profile(request):
+    title="Profile"
+    #print Profile.objects.all().filter(username = request.user)
+    if request.method == "POST":
+        form = ProfileForm(request.POST,instance=request.user.profile)
+        if form.is_valid():
+            form.save()
+    else:
+        user = request.user
+        profile = user.profile
+        form = ProfileForm(instance = profile)
+    context = {
+        'title':title,
+        'form':form,
+        } 
+    return render(request,"profile.html",context)
+
+def setting(request):
+    title = "Setting"
+    context = {
+        'title': title,
+    }
+    return render(request,'setting.html',context)
+
+
+
+def selected_domain(u_name):
+    list=Domain.objects.filter(username=u_name)
+    values = ' '.join(str(v) for v in list)
+    new_list=re.split(',',values)
+    new=[]
+    for i in new_list:
+        a=re.findall('[a-zA-Z]',i)
+        a="".join(a)
+        new.append(a[1:])
+    return new
+
+
+
+
+def python(request):
+    title = "python internship"
+    if request.user.is_authenticated():
+        u_name=request.user
+        selected_domain(u_name)
+        new=selected_domain(u_name)
+request.user.is_authenticated():
+        context = {
+            'title': title,
+            'list':new,
+            }
+    else:
+        context = {
+            'title':title,
+        }
+
+    return render(request,"python.html",context)
+
+
+def java(request):
+    title = "java internship"
+    context = {
+	'title':title,
+    }
+    return render(request,"java.html",context)
+
+def php(request):
+    title="php internship"
+    context ={
+        'title':title,
+    }
+    return render(request,"php.html",context)
+
+
